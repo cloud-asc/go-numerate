@@ -20,6 +20,7 @@ var baseDN string
 var query string
 var outputType string
 var fileName string
+var forestDN string
 
 func init() {
 
@@ -85,7 +86,7 @@ func authenticate(l *ldap.Conn) {
 		0,
 		false,
 		"(objectClass=*)",
-		[]string{"defaultNamingContext"},
+		[]string{"defaultNamingContext", "rootDomainNamingContext"},
 		nil,
 	)
 
@@ -100,6 +101,9 @@ func authenticate(l *ldap.Conn) {
 
 	baseDN = sr.Entries[0].GetAttributeValue("defaultNamingContext")
 	fmt.Println("Base DN:", baseDN)
+	forestDN = sr.Entries[0].GetAttributeValue("rootDomainNamingContext")
+	fmt.Println("Forest DN:", forestDN)
+
 	//username and pw bind
 	domainName := DNtoDomain(baseDN)
 	if domainPtr != "" {
