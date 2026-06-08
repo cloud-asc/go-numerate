@@ -404,7 +404,23 @@ func PrintCAs(cas []EnterpriseCA) {
 }
 
 func certConfirmed(l *ldap.Conn, query string, output string) {
-
+	debugReq := ldap.NewSearchRequest(
+		"CN=Configuration,"+baseDN,
+		ldap.ScopeWholeSubtree,
+		ldap.NeverDerefAliases,
+		0, 0, false,
+		"(objectClass=pKIEnrollmentService)",
+		[]string{"cn", "distinguishedName"},
+		nil,
+	)
+	debugRes, err := l.Search(debugReq)
+	if err != nil {
+		fmt.Println("debug search err:", err)
+	} else {
+		for _, e := range debugRes.Entries {
+			fmt.Println("found CA at:", e.DN)
+		}
+	}
 	cas, err := GetEnterpriseCAs(l, baseDN)
 	if err == nil {
 		PrintCAs(cas)
