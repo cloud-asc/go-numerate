@@ -104,6 +104,12 @@ func authenticate(l *ldap.Conn) {
 	domainName := DNtoDomain(baseDN)
 	if domainPtr != "" {
 		domainName = domainPtr
+		parts := strings.Split(domainPtr, ".")
+		var dnParts []string
+		for _, p := range parts {
+			dnParts = append(dnParts, "DC="+p)
+		}
+		baseDN = strings.Join(dnParts, ",")
 	}
 	userPtr = userPtr + "@" + domainName
 	fmt.Println("Attempting authentication with user:", userPtr)
