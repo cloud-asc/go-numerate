@@ -77,14 +77,14 @@ func certSearch(cert string) *ldap.SearchRequest {
 	var filter string
 	var certDN string
 	if cert != "*" {
-		certDN = "CN=Public Key Services,CN=Services,CN=Configuration," + configNC
+		certDN = "CN=Public Key Services,CN=Services,CN=Configuration," + baseDN
 		//baseDN = "CN=Certification Authorities,CN=Public Key Services,CN=Services," + baseDN
 		filter = fmt.Sprintf("(&(objectClass=pKICertificateTemplate)(cn=%s))", cert)
 		//filter = fmt.Sprintf("(&(objectClass=certificationAuthority)(cn=%s))", cert)
 	} else {
 		fmt.Println("test")
 		//baseDN = "CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration," + baseDN
-		certDN = "CN=Public Key Services,CN=Services,CN=Configuration," + configNC
+		certDN = "CN=Public Key Services,CN=Services,CN=Configuration," + baseDN
 		filter = "(&(objectClass=pKICertificateTemplate))"
 		//filter = "(&(objectClass=certificationAuthority))"
 		//filter = "(&(objectClass=pKIEnrollmentService)(certificateTemplates=*))"
@@ -135,8 +135,8 @@ func GetCertificateTemplateSD(l *ldap.Conn, templateCN string) ([]byte, error) {
 
 	// Build DN
 	dn := fmt.Sprintf(
-		"CN=%s,CN=Certificate Templates,CN=Public Key Services,CN=Services,%s",
-		templateCN, configNC,
+		"CN=%s,CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,",
+		templateCN,
 	)
 	dn += baseDN
 
@@ -349,7 +349,7 @@ type EnterpriseCA struct {
 
 func GetEnterpriseCAs(l *ldap.Conn, baseDN string) ([]EnterpriseCA, error) {
 
-	configNC := "CN=Public Key Services,CN=Services,CN=Configuration," + configNC
+	configNC := "CN=Public Key Services,CN=Services,CN=Configuration," + baseDN
 	req := ldap.NewSearchRequest(
 		configNC,
 		ldap.ScopeWholeSubtree,
