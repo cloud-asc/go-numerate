@@ -33,17 +33,34 @@ func compSearch(computer string) *ldap.SearchRequest {
 func computersConfirmed(l *ldap.Conn, query string, output string) {
 	searchReq := compSearch(query)
 
-	result, err := l.Search(searchReq)
-	if err != nil {
-		log.Fatal(err)
+	var allEntries []*ldap.Entry
+	pagingControl := ldap.NewControlPaging(1000)
+	searchReq.Controls = append(searchReq.Controls, pagingControl)
+
+	for {
+		result, err := l.Search(searchReq)
+		if err != nil {
+			log.Fatal(err)
+		}
+		allEntries = append(allEntries, result.Entries...)
+
+		updatedControl := ldap.FindControl(result.Controls, ldap.ControlTypePaging)
+		if updatedControl == nil {
+			break
+		}
+		pagingResult, ok := updatedControl.(*ldap.ControlPaging)
+		if !ok || len(pagingResult.Cookie) == 0 {
+			break
+		}
+		pagingControl.SetCookie(pagingResult.Cookie)
 	}
 
 	fmt.Println("")
-	log.Println("Got", len(result.Entries), "search results")
+	log.Println("Got", len(allEntries), "search results")
 
 	switch output {
 	case "console":
-		for _, entry := range result.Entries {
+		for _, entry := range allEntries {
 			fmt.Println("===============================================================")
 			for _, attribute := range entry.Attributes {
 				if attribute.Name == "objectSid" {
@@ -64,14 +81,13 @@ func computersConfirmed(l *ldap.Conn, query string, output string) {
 				"objectSid",
 				"Description"},
 		}
-		for _, entry := range result.Entries {
+		for _, entry := range allEntries {
 			rowToAdd := make([]string, len(csvOutput[0]))
 			for i := 0; i < len(csvOutput[0]); i++ {
 				for _, attribute := range entry.Attributes {
 					if attribute.Name == csvOutput[0][i] {
 						if timeAttrs[attribute.Name] {
 							attribute.Values[0] = adFileTimeToTime(attribute.Values[0])
-
 						} else if attribute.Name == "whenCreated" || attribute.Name == "whenChanged" {
 							attribute.Values[0] = parseGeneralizedTimeString(attribute.Values[0])
 						} else if attribute.Name == "objectSid" {
@@ -83,8 +99,7 @@ func computersConfirmed(l *ldap.Conn, query string, output string) {
 					}
 				}
 			}
-			rowToAddSlice := rowToAdd[:]
-			csvOutput = append(csvOutput, rowToAddSlice)
+			csvOutput = append(csvOutput, rowToAdd)
 		}
 		if fileName == "" {
 			t := time.Now()
@@ -94,6 +109,5 @@ func computersConfirmed(l *ldap.Conn, query string, output string) {
 			csvExport(csvOutput, fileName)
 		}
 		fmt.Printf("Successfully exported to %s.csv", fileName)
-
 	}
 }
