@@ -17,6 +17,7 @@ var domainPtr string
 var searchItem string
 var l ldap.Conn
 var baseDN string
+var configNC string
 var query string
 var outputType string
 var fileName string
@@ -99,7 +100,11 @@ func authenticate(l *ldap.Conn) {
 	}
 
 	baseDN = sr.Entries[0].GetAttributeValue("defaultNamingContext")
+	configNC = sr.Entries[0].GetAttributeValue("configurationNamingContext")
+
 	fmt.Println("Base DN:", baseDN)
+	fmt.Println("Config NC:", configNC)
+
 	//username and pw bind
 	domainName := DNtoDomain(baseDN)
 	if domainPtr != "" {
