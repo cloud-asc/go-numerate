@@ -349,8 +349,7 @@ type EnterpriseCA struct {
 
 func GetEnterpriseCAs(l *ldap.Conn, baseDN string) ([]EnterpriseCA, error) {
 
-	configNC := "CN=CDP,CN=Public Key Services,CN=Services," + baseDN
-	//fmt.Println("CONFIG: ", configNC)
+	configNC := "CN=Enrollment Services,CN=Public Key Services,CN=Services,CN=Configuration," + baseDN //fmt.Println("CONFIG: ", configNC)
 	req := ldap.NewSearchRequest(
 		configNC,
 		ldap.ScopeWholeSubtree,
