@@ -140,7 +140,6 @@ func GetCertificateTemplateSD(l *ldap.Conn, templateCN string) ([]byte, error) {
 		"CN=%s,CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,%s",
 		templateCN, forestDN,
 	)
-	dn += baseDN
 
 	// BER encoding for an ASN.1 SEQUENCE containing an INTEGER with value 7
 	// 0x30 (Sequence) 0x03 (Length) 0x02 (Integer) 0x01 (Length) 0x07 (Value)
