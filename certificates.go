@@ -394,13 +394,6 @@ func PrintCAs(cas []EnterpriseCA) {
 		fmt.Println("Name:", ca.Name)
 		fmt.Println("DNS :", ca.DNSName)
 		fmt.Println("DN  :", ca.DN)
-
-		fmt.Println("Templates:")
-		for _, t := range ca.Templates {
-			fmt.Println("  -", t)
-		}
-
-		fmt.Println()
 	}
 }
 
@@ -532,10 +525,10 @@ func certConfirmed(l *ldap.Conn, query string, output string) {
 				}
 			}
 			if certTemplates[i].dangerousEnroll && !certTemplates[i].managerApproval && certTemplates[i].enrolleeSupplies && certTemplates[i].clientAuth {
-				fmt.Printf("\n[*] ESC1 : Low level user can supply enrollee subject!")
+				fmt.Printf("\n[*] ESC1 : Low level user can supply enrollee subject!\n")
 			}
 			if certTemplates[i].dangerousWrite {
-				fmt.Printf("\n[*] ESC5 : Low level user can change certificate template!")
+				fmt.Printf("\n[*] ESC5 : Low level user can change certificate template!\n")
 			}
 
 		}
