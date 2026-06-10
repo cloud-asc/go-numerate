@@ -16,8 +16,7 @@ func compSearch(computer string) *ldap.SearchRequest {
 	} else {
 		filter = "(&(objectClass=computer)(sAMAccountType=805306369))"
 	}
-	return ldap.NewSearchRequest(baseDN, ldap.ScopeWholeSubtree, 0, 0, 0, false, filter, []string{"*", "+"}, []ldap.Control{})
-
+	return ldap.NewSearchRequest(baseDN, ldap.ScopeWholeSubtree, 0, 0, 0, false, filter, []string{}, []ldap.Control{})
 }
 
 func computersConfirmed(l *ldap.Conn, query string, output string) {
@@ -83,11 +82,17 @@ func computersConfirmed(l *ldap.Conn, query string, output string) {
 		for _, entry := range allEntries {
 			attrMap := map[string]string{"dn": entry.DN}
 			for _, attribute := range entry.Attributes {
+				if attribute.Name == "userCertificate" {
+					continue
+				}
+				if attribute.Name == "objectGUID" {
+					attrMap[attribute.Name] = guidToString(entry.GetRawAttributeValue("objectGUID"))
+				}
 				if attribute.Name == "objectSid" {
 					attrMap[attribute.Name] = sidToString(entry.GetRawAttributeValue("objectSid"))
 				} else if timeAttrs[attribute.Name] {
 					attrMap[attribute.Name] = adFileTimeToTime(attribute.Values[0])
-				} else if attribute.Name == "whenCreated" || attribute.Name == "whenChanged" {
+				} else if attribute.Name == "whenCreated" || attribute.Name == "whenChanged" || attribute.Name == "badPasswordTime" || attribute.Name == "lastLogon" || attribute.Name == "lastLogoff" {
 					attrMap[attribute.Name] = parseGeneralizedTimeString(attribute.Values[0])
 				} else if attribute.Name == "userAccountControl" {
 					attrMap[attribute.Name] = parseUserAccountControl(attribute.Values[0])
@@ -110,4 +115,12 @@ func computersConfirmed(l *ldap.Conn, query string, output string) {
 		csvExport(csvOutput, fileName)
 		fmt.Printf("Successfully exported to %s.csv", fileName)
 	}
+}
+
+func guidToString(b []byte) string {
+	if len(b) != 16 {
+		return ""
+	}
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x",
+		b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
