@@ -17,6 +17,9 @@ var timeAttrs = map[string]bool{
 	"pwdLastSet":         true,
 	"accountExpires":     true,
 	"lastLogonTimestamp": true,
+	"badPasswordTime":    true,
+	"lastLogon":          true,
+	"lastLogoff":         true,
 }
 
 // USER ACCOUNT CONTROL FLAGS TO CHECK
