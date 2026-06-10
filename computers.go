@@ -16,7 +16,8 @@ func compSearch(computer string) *ldap.SearchRequest {
 	} else {
 		filter = "(&(objectClass=computer)(sAMAccountType=805306369))"
 	}
-	return ldap.NewSearchRequest(baseDN, ldap.ScopeWholeSubtree, 0, 0, 0, false, filter, []string{}, []ldap.Control{})
+	return ldap.NewSearchRequest(baseDN, ldap.ScopeWholeSubtree, 0, 0, 0, false, filter, []string{"*", "+"}, []ldap.Control{})
+
 }
 
 func computersConfirmed(l *ldap.Conn, query string, output string) {
